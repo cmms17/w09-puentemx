@@ -16,6 +16,7 @@ export default function FormularioEnvio({ tareaId }: { tareaId: string }) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [envioId, setEnvioId] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState(false);
 
   function actualizarDecision(i: number, campo: keyof Decision, valor: string) {
     setDecisiones((prev) =>
@@ -56,6 +57,24 @@ export default function FormularioEnvio({ tareaId }: { tareaId: string }) {
     setEnvioId(data.envioId);
   }
 
+  async function copiarFolio() {
+    if (!envioId) return;
+    const resumen = [
+      "Puente MX — folio de envío",
+      `Folio: ${envioId}`,
+      `Candidato: ${candidatoAlias}`,
+      `Defensa agendada: ${slotPropuesto}`,
+      "Guarda este folio — lo vas a necesitar si quieres dar seguimiento a tu verificación.",
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(resumen);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    } catch {
+      setError("No se pudo copiar automáticamente. Anota el folio a mano.");
+    }
+  }
+
   if (envioId) {
     return (
       <div className="bg-white rounded-2xl shadow-sm px-4 py-4 text-center space-y-2">
@@ -63,9 +82,19 @@ export default function FormularioEnvio({ tareaId }: { tareaId: string }) {
           Trabajo enviado y defensa agendada para el {slotPropuesto}.
         </p>
         <p className="text-xs text-slate-500">
-          Un revisor humano va a firmar tu verificación antes de emitir tu prueba portable. Tu
-          folio de envío: <span className="font-mono">{envioId.slice(0, 8)}</span>
+          Un revisor humano va a firmar tu verificación antes de emitir tu prueba portable. Toma
+          nota de tu folio de envío ahora — es tu referencia si necesitas dar seguimiento:
         </p>
+        <p className="text-sm font-mono font-bold text-[#14213d] bg-slate-50 rounded-lg px-3 py-2 break-all">
+          {envioId}
+        </p>
+        <button
+          type="button"
+          onClick={copiarFolio}
+          className="text-xs font-semibold text-indigo-900 bg-indigo-100 rounded-lg px-3 py-2 hover:bg-indigo-200"
+        >
+          {copiado ? "✓ Copiado" : "Copiar folio"}
+        </button>
       </div>
     );
   }
