@@ -11,7 +11,7 @@ export default async function PaginaPrueba({
   const { token } = await params;
   const supabase = crearClienteSupabaseServidor();
 
-  const { data: prueba } = await supabase
+  const { data: prueba, error: errorPrueba } = await supabase
     .from("pruebas")
     .select(
       `id, generado_en,
@@ -25,6 +25,10 @@ export default async function PaginaPrueba({
     )
     .eq("token", token)
     .maybeSingle();
+
+  if (errorPrueba) {
+    console.error("Error consultando prueba:", errorPrueba);
+  }
 
   if (!prueba || !prueba.envios) {
     notFound();

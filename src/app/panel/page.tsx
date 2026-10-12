@@ -18,7 +18,7 @@ export default async function PanelRevision() {
   }
 
   const supabase = crearClienteSupabaseServidor();
-  const { data: envios } = await supabase
+  const { data: envios, error: errorEnvios } = await supabase
     .from("envios")
     .select(
       `id, candidato_alias, facturas_revisadas, facturas_totales, resumen_llm, enviado_en,
@@ -29,6 +29,10 @@ export default async function PanelRevision() {
        pruebas ( id, token )`
     )
     .order("enviado_en", { ascending: false });
+
+  if (errorEnvios) {
+    console.error("Error consultando envíos:", errorEnvios);
+  }
 
   const conEstado = (envios ?? []).map((e) => ({
     ...e,

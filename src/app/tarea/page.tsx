@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PaginaTarea() {
   const supabase = crearClienteSupabaseServidor();
-  const { data: tarea } = await supabase
+  const { data: tarea, error } = await supabase
     .from("tareas")
     .select(
       "id, titulo, descripcion, empleador_nombre, empleador_demo, compensacion_mxn, supervisor_nombre, alcance"
@@ -13,6 +13,19 @@ export default async function PaginaTarea() {
     .order("creado_en", { ascending: true })
     .limit(1)
     .maybeSingle();
+
+  // Nunca tragarse el error en silencio: una falla de conexión real se veía
+  // idéntica a "no hay tarea todavía", lo cual costó tiempo de debug.
+  if (error) {
+    console.error("Error consultando tareas:", error);
+    return (
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <p className="text-sm text-rose-600">
+          Error conectando con la base de datos: {error.message}
+        </p>
+      </main>
+    );
+  }
 
   if (!tarea) {
     return (
